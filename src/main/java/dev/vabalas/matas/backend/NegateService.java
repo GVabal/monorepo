@@ -5,6 +5,7 @@ import dev.vabalas.matas.model.SponsoredProductsCampaignsLabel;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,8 @@ import static dev.vabalas.matas.model.SearchTermReportLabel.SALES;
 import static dev.vabalas.matas.model.SearchTermReportLabel.SPEND;
 import static dev.vabalas.matas.model.SearchTermReportLabel.STATE;
 import static dev.vabalas.matas.model.SearchTermReportLabel.UNITS;
+import static dev.vabalas.matas.model.SearchTermReportRow.MatchType;
+import static dev.vabalas.matas.model.SearchTermReportRow.State;
 
 @Service
 public class NegateService {
@@ -53,31 +56,31 @@ public class NegateService {
              var workBook = new XSSFWorkbook(inputStream);
              var newWorkBook = new XSSFWorkbook()) {
             var rowIterator = workBook.getSheet(SEARCH_TERM_REPORT_SHEET_NAME).rowIterator();
-            rowIterator.next(); // skip label column
-
             var searchTermReportRows = new ArrayList<SearchTermReportRow>();
+
+            rowIterator.next(); // skip label column
             while (rowIterator.hasNext()) {
                 searchTermReportRows.add(mapToSearchTermReportRow(rowIterator.next()));
             }
 
             newWorkBook.createSheet(PROCESSED_ROWS_SHEET_NAME);
-            var processedRowsSheet = newWorkBook.getSheet(PROCESSED_ROWS_SHEET_NAME);
-            processedRowsSheet.createRow(TOP_ROW_INDEX);
-
+            var newWorkBookSheet = newWorkBook.getSheet(PROCESSED_ROWS_SHEET_NAME);
+            newWorkBookSheet.createRow(TOP_ROW_INDEX);
+            var processedRowsSheetLabelRow = newWorkBookSheet.getRow(TOP_ROW_INDEX);
             var sponsoredProductsCampaignsLabelRow = workBook.getSheet(SPONSORED_PRODUCTS_CAMPAIGNS_SHEET_NAME).getRow(TOP_ROW_INDEX);
             for (int index = 0; index < sponsoredProductsCampaignsLabelRow.getLastCellNum(); index++) {
-                processedRowsSheet.getRow(TOP_ROW_INDEX).createCell(index, CellType.STRING);
-                processedRowsSheet.getRow(TOP_ROW_INDEX).getCell(index).setCellValue(sponsoredProductsCampaignsLabelRow.getCell(index).getStringCellValue());
+                processedRowsSheetLabelRow.createCell(index, CellType.STRING);
+                processedRowsSheetLabelRow.getCell(index).setCellValue(sponsoredProductsCampaignsLabelRow.getCell(index).getStringCellValue());
             }
 
             searchTermReportRows.stream()
-                    .filter(row -> row.state() == SearchTermReportRow.State.ENABLED &&
-                            row.campaignState() == SearchTermReportRow.State.ENABLED &&
-                            row.matchType() != SearchTermReportRow.MatchType.EXACT &&
+                    .filter(row -> row.state() == State.ENABLED &&
+                            row.campaignState() == State.ENABLED &&
+                            row.matchType() != MatchType.EXACT &&
                             !row.customerSearchTerm().startsWith("b0") &&
                             row.orders() == 0 &&
                             row.clicks() >= 10)
-                    .forEach(row -> addToSheet(row, processedRowsSheet));
+                    .forEach(row -> addToSheet(row, newWorkBookSheet));
 
             newWorkBook.write(outputStream);
         }
@@ -112,11 +115,11 @@ public class NegateService {
                 nullIfEmpty(row.getCell(AD_GROUP_ID.index()).getStringCellValue()),
                 nullIfEmpty(row.getCell(KEYWORD_ID.index()).getStringCellValue()),
                 nullIfEmpty(row.getCell(PRODUCT_TARGETING_ID.index()).getStringCellValue()),
-                SearchTermReportRow.State.valueOf(row.getCell(STATE.index()).getStringCellValue().toUpperCase()),
-                SearchTermReportRow.State.valueOf(row.getCell(CAMPAIGN_STATE.index()).getStringCellValue().toUpperCase()),
+                State.valueOf(row.getCell(STATE.index()).getStringCellValue().toUpperCase()),
+                State.valueOf(row.getCell(CAMPAIGN_STATE.index()).getStringCellValue().toUpperCase()),
                 nullIfNotNumericType(row.getCell(BID.index())),
                 row.getCell(KEYWORD_TEXT.index()).getStringCellValue(),
-                SearchTermReportRow.MatchType.valueOfNullable(row.getCell(MATCH_TYPE.index()).getStringCellValue().toUpperCase()),
+                MatchType.valueOfNullable(row.getCell(MATCH_TYPE.index()).getStringCellValue().toUpperCase()),
                 row.getCell(PRODUCT_TARGETING_EXPRESSION.index()).getStringCellValue(),
                 row.getCell(CUSTOMER_SEARCH_TERM.index()).getStringCellValue(),
                 (int) row.getCell(IMPRESSIONS.index()).getNumericCellValue(),
