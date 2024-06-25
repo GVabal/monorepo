@@ -90,8 +90,8 @@ public class NegateService {
         newRow.createCell(SponsoredProductsCampaignsLabel.PRODUCT.index()).setCellValue(row.product());
         newRow.createCell(SponsoredProductsCampaignsLabel.ENTITY.index()).setCellValue("negative keyword");
         newRow.createCell(SponsoredProductsCampaignsLabel.OPERATION.index()).setCellValue("create");
-        newRow.createCell(SponsoredProductsCampaignsLabel.CAMPAIGN_ID.index()).setCellValue(row.campaignId());
-        newRow.createCell(SponsoredProductsCampaignsLabel.AD_GROUP_ID.index()).setCellValue(row.adGroupId());
+        newRow.createCell(SponsoredProductsCampaignsLabel.CAMPAIGN_ID.index()).setCellValue(String.valueOf(row.campaignId()));
+        newRow.createCell(SponsoredProductsCampaignsLabel.AD_GROUP_ID.index()).setCellValue(String.valueOf(row.adGroupId()));
         newRow.createCell(SponsoredProductsCampaignsLabel.STATE.index()).setCellValue(row.state().name().toLowerCase());
         newRow.createCell(SponsoredProductsCampaignsLabel.KEYWORD_TEXT.index()).setCellValue(row.customerSearchTerm());
         newRow.createCell(SponsoredProductsCampaignsLabel.MATCH_TYPE.index()).setCellValue("negative exact");
