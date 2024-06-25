@@ -83,10 +83,10 @@ public class NegateService {
         }
     }
 
-    private static void addToSheet(SearchTermReportRow row, XSSFSheet processedRows) {
-        var nextRowIndex = processedRows.getLastRowNum() + 1;
-        processedRows.createRow(nextRowIndex);
-        var newRow = processedRows.getRow(nextRowIndex);
+    private static void addToSheet(SearchTermReportRow row, XSSFSheet sheet) {
+        var nextRowIndex = sheet.getLastRowNum() + 1;
+        sheet.createRow(nextRowIndex);
+        var newRow = sheet.getRow(nextRowIndex);
         newRow.createCell(SponsoredProductsCampaignsLabel.PRODUCT.index()).setCellValue(row.product());
         newRow.createCell(SponsoredProductsCampaignsLabel.ENTITY.index()).setCellValue("negative keyword");
         newRow.createCell(SponsoredProductsCampaignsLabel.OPERATION.index()).setCellValue("create");
