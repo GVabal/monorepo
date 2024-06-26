@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.1'
 	id 'io.spring.dependency-management' version '1.1.5'
+	id 'com.vaadin' version '24.4.3'
 }
 
 group = 'dev.vabalas'
@@ -15,14 +16,25 @@ java {
 
 repositories {
 	mavenCentral()
+	maven { setUrl('https://maven.vaadin.com/vaadin-addons') }
 }
 
 dependencies {
+	implementation 'com.vaadin:vaadin-spring-boot-starter:24.4.3'
 	implementation 'org.springframework.boot:spring-boot-starter'
+
 	implementation 'org.apache.poi:poi-ooxml:5.2.5'
+
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+vaadin {
+	productionMode = false
+	optimizeBundle = false
+	alwaysExecutePrepareFrontend = true
 }
 
 tasks.withType(JavaCompile).configureEach {

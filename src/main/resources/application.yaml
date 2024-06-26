@@ -1,0 +1,14 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  mustache:
+    check-template-location: false
+
+vaadin:
+  launch-browser: false
+
+logging:
+  level:
+    org.atmosphere: warn
