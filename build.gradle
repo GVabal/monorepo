@@ -1,12 +1,16 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.3.1'
-	id 'io.spring.dependency-management' version '1.1.5'
-	id 'com.vaadin' version '24.4.3'
+	id 'application'
+	id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 group = 'dev.vabalas'
 version = '1'
+mainClassName = 'Main'
+
+repositories {
+	mavenCentral()
+}
 
 java {
 	toolchain {
@@ -14,33 +18,11 @@ java {
 	}
 }
 
-repositories {
-	mavenCentral()
-	maven { setUrl('https://maven.vaadin.com/vaadin-addons') }
+javafx {
+	version = "21"
+	modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
 dependencies {
-	implementation 'com.vaadin:vaadin-spring-boot-starter:24.4.3'
-	implementation 'org.springframework.boot:spring-boot-starter'
-
 	implementation 'org.apache.poi:poi-ooxml:5.2.5'
-
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-vaadin {
-	productionMode = false
-	optimizeBundle = false
-	alwaysExecutePrepareFrontend = true
-}
-
-tasks.withType(JavaCompile).configureEach {
-	options.encoding = 'UTF-8'
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
 }

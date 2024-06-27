@@ -1,6 +1,6 @@
 package dev.vabalas.matas.model;
 
-public record SponsoredProductsCampaignsView(
+public record SponsoredProductsCampaignsRow(
     String product,
     String entity,
     String operation,

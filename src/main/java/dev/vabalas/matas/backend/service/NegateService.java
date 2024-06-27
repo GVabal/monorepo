@@ -1,14 +1,16 @@
 package dev.vabalas.matas.backend.service;
 
+import dev.vabalas.matas.model.SearchTermReportLabel;
 import dev.vabalas.matas.model.SearchTermReportRow;
 import dev.vabalas.matas.model.SponsoredProductsCampaignsLabel;
-import dev.vabalas.matas.model.SponsoredProductsCampaignsView;
+import dev.vabalas.matas.model.SponsoredProductsCampaignsRow;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,40 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static dev.vabalas.matas.model.SearchTermReportLabel.ACOS;
-import static dev.vabalas.matas.model.SearchTermReportLabel.AD_GROUP_ID;
-import static dev.vabalas.matas.model.SearchTermReportLabel.BID;
-import static dev.vabalas.matas.model.SearchTermReportLabel.CAMPAIGN_ID;
-import static dev.vabalas.matas.model.SearchTermReportLabel.CAMPAIGN_STATE;
-import static dev.vabalas.matas.model.SearchTermReportLabel.CLICKS;
-import static dev.vabalas.matas.model.SearchTermReportLabel.CLICK_THROUGH;
-import static dev.vabalas.matas.model.SearchTermReportLabel.CONVERSION_RATE;
-import static dev.vabalas.matas.model.SearchTermReportLabel.CPC;
-import static dev.vabalas.matas.model.SearchTermReportLabel.CUSTOMER_SEARCH_TERM;
-import static dev.vabalas.matas.model.SearchTermReportLabel.IMPRESSIONS;
-import static dev.vabalas.matas.model.SearchTermReportLabel.KEYWORD_ID;
-import static dev.vabalas.matas.model.SearchTermReportLabel.KEYWORD_TEXT;
-import static dev.vabalas.matas.model.SearchTermReportLabel.MATCH_TYPE;
-import static dev.vabalas.matas.model.SearchTermReportLabel.ORDERS;
-import static dev.vabalas.matas.model.SearchTermReportLabel.PRODUCT;
-import static dev.vabalas.matas.model.SearchTermReportLabel.PRODUCT_TARGETING_EXPRESSION;
-import static dev.vabalas.matas.model.SearchTermReportLabel.PRODUCT_TARGETING_ID;
-import static dev.vabalas.matas.model.SearchTermReportLabel.ROAS;
-import static dev.vabalas.matas.model.SearchTermReportLabel.SALES;
-import static dev.vabalas.matas.model.SearchTermReportLabel.SPEND;
-import static dev.vabalas.matas.model.SearchTermReportLabel.STATE;
-import static dev.vabalas.matas.model.SearchTermReportLabel.UNITS;
-import static dev.vabalas.matas.model.SearchTermReportRow.MatchType;
-import static dev.vabalas.matas.model.SearchTermReportRow.State;
-
-@Service
 public class NegateService {
 
+    private static final Logger log = LogManager.getLogger(NegateService.class);
     private static final String PROCESSED_ROWS_SHEET_NAME = "Processed rows";
     private static final String SEARCH_TERM_REPORT_SHEET_NAME = "SP Search Term Report";
     private static final int TOP_ROW_INDEX = 0;
 
-    public List<SearchTermReportRow> extractInterestingRows(InputStream inputStream, int minClicks) throws IOException {
+    public List<SearchTermReportRow> extractInterestingRows(InputStream inputStream, int minClicks) {
         try (var workBook = new XSSFWorkbook(inputStream)) {
             var rowIterator = workBook.getSheet(SEARCH_TERM_REPORT_SHEET_NAME).rowIterator();
             var searchTermReportRows = new ArrayList<SearchTermReportRow>();
@@ -61,17 +37,20 @@ public class NegateService {
             }
 
             return searchTermReportRows.stream()
-                    .filter(row -> row.state() == State.ENABLED &&
-                            row.campaignState() == State.ENABLED &&
-                            row.matchType() != MatchType.EXACT &&
+                    .filter(row -> row.state() == SearchTermReportRow.State.ENABLED &&
+                            row.campaignState() == SearchTermReportRow.State.ENABLED &&
+                            row.matchType() != SearchTermReportRow.MatchType.EXACT &&
                             !row.customerSearchTerm().startsWith("b0") &&
                             row.orders() == 0 &&
                             row.clicks() >= minClicks)
                     .toList();
+        } catch (IOException e) {
+            log.error("Failed to extract interesting rows: {}", e.getMessage());
+            return List.of();
         }
     }
 
-    public byte[] generateReport(Set<SearchTermReportRow> selectedItems) throws IOException {
+    public byte[] generateReport(Set<SearchTermReportRow> selectedItems) {
         try (var newWorkBook = new XSSFWorkbook();
              var outputStream = new ByteArrayOutputStream()) {
             newWorkBook.createSheet(PROCESSED_ROWS_SHEET_NAME);
@@ -86,18 +65,27 @@ public class NegateService {
             }
 
             selectedItems.stream()
-                    .map(it -> new SponsoredProductsCampaignsView(it.product(), "negative keyword", "create",
-                            String.valueOf(it.campaignId()), String.valueOf(it.adGroupId()), it.state().name().toLowerCase(),
-                            it.customerSearchTerm(), "negative exact"))
+                    .map(row -> new SponsoredProductsCampaignsRow(
+                            row.product(),
+                            "negative keyword",
+                            "create",
+                            String.valueOf(row.campaignId()),
+                            String.valueOf(row.adGroupId()),
+                            row.state().name().toLowerCase(),
+                            row.customerSearchTerm(),
+                            "negative exact"))
                     .forEach(row -> addToSheet(row, newWorkBookSheet));
 
             newWorkBook.write(outputStream);
 
             return outputStream.toByteArray();
+        } catch (IOException e) {
+            log.error("Failed to generate report: {}", e.getMessage());
+            return new byte[]{};
         }
     }
 
-    private static void addToSheet(SponsoredProductsCampaignsView row, XSSFSheet sheet) {
+    private static void addToSheet(SponsoredProductsCampaignsRow row, XSSFSheet sheet) {
         var nextRowIndex = sheet.getLastRowNum() + 1;
         sheet.createRow(nextRowIndex);
         var newRow = sheet.getRow(nextRowIndex);
@@ -121,29 +109,29 @@ public class NegateService {
 
     private static SearchTermReportRow mapToSearchTermReportRow(Row row) {
         return new SearchTermReportRow(
-                row.getCell(PRODUCT.index()).getStringCellValue(),
-                nullIfEmpty(row.getCell(CAMPAIGN_ID.index()).getStringCellValue()),
-                nullIfEmpty(row.getCell(AD_GROUP_ID.index()).getStringCellValue()),
-                nullIfEmpty(row.getCell(KEYWORD_ID.index()).getStringCellValue()),
-                nullIfEmpty(row.getCell(PRODUCT_TARGETING_ID.index()).getStringCellValue()),
-                State.valueOf(row.getCell(STATE.index()).getStringCellValue().toUpperCase()),
-                State.valueOf(row.getCell(CAMPAIGN_STATE.index()).getStringCellValue().toUpperCase()),
-                nullIfNotNumericType(row.getCell(BID.index())),
-                row.getCell(KEYWORD_TEXT.index()).getStringCellValue(),
-                MatchType.valueOfNullable(row.getCell(MATCH_TYPE.index()).getStringCellValue().toUpperCase()),
-                row.getCell(PRODUCT_TARGETING_EXPRESSION.index()).getStringCellValue(),
-                row.getCell(CUSTOMER_SEARCH_TERM.index()).getStringCellValue(),
-                (int) row.getCell(IMPRESSIONS.index()).getNumericCellValue(),
-                (int) row.getCell(CLICKS.index()).getNumericCellValue(),
-                row.getCell(CLICK_THROUGH.index()).getNumericCellValue(),
-                row.getCell(SPEND.index()).getNumericCellValue(),
-                row.getCell(SALES.index()).getNumericCellValue(),
-                (int) row.getCell(ORDERS.index()).getNumericCellValue(),
-                (int) row.getCell(UNITS.index()).getNumericCellValue(),
-                row.getCell(CONVERSION_RATE.index()).getNumericCellValue(),
-                row.getCell(ACOS.index()).getNumericCellValue(),
-                row.getCell(CPC.index()).getNumericCellValue(),
-                row.getCell(ROAS.index()).getNumericCellValue()
+                row.getCell(SearchTermReportLabel.PRODUCT.index()).getStringCellValue(),
+                nullIfEmpty(row.getCell(SearchTermReportLabel.CAMPAIGN_ID.index()).getStringCellValue()),
+                nullIfEmpty(row.getCell(SearchTermReportLabel.AD_GROUP_ID.index()).getStringCellValue()),
+                nullIfEmpty(row.getCell(SearchTermReportLabel.KEYWORD_ID.index()).getStringCellValue()),
+                nullIfEmpty(row.getCell(SearchTermReportLabel.PRODUCT_TARGETING_ID.index()).getStringCellValue()),
+                SearchTermReportRow.State.valueOf(row.getCell(SearchTermReportLabel.STATE.index()).getStringCellValue().toUpperCase()),
+                SearchTermReportRow.State.valueOf(row.getCell(SearchTermReportLabel.CAMPAIGN_STATE.index()).getStringCellValue().toUpperCase()),
+                nullIfNotNumericType(row.getCell(SearchTermReportLabel.BID.index())),
+                row.getCell(SearchTermReportLabel.KEYWORD_TEXT.index()).getStringCellValue(),
+                SearchTermReportRow.MatchType.valueOfNullable(row.getCell(SearchTermReportLabel.MATCH_TYPE.index()).getStringCellValue().toUpperCase()),
+                row.getCell(SearchTermReportLabel.PRODUCT_TARGETING_EXPRESSION.index()).getStringCellValue(),
+                row.getCell(SearchTermReportLabel.CUSTOMER_SEARCH_TERM.index()).getStringCellValue(),
+                (int) row.getCell(SearchTermReportLabel.IMPRESSIONS.index()).getNumericCellValue(),
+                (int) row.getCell(SearchTermReportLabel.CLICKS.index()).getNumericCellValue(),
+                row.getCell(SearchTermReportLabel.CLICK_THROUGH.index()).getNumericCellValue(),
+                row.getCell(SearchTermReportLabel.SPEND.index()).getNumericCellValue(),
+                row.getCell(SearchTermReportLabel.SALES.index()).getNumericCellValue(),
+                (int) row.getCell(SearchTermReportLabel.ORDERS.index()).getNumericCellValue(),
+                (int) row.getCell(SearchTermReportLabel.UNITS.index()).getNumericCellValue(),
+                row.getCell(SearchTermReportLabel.CONVERSION_RATE.index()).getNumericCellValue(),
+                row.getCell(SearchTermReportLabel.ACOS.index()).getNumericCellValue(),
+                row.getCell(SearchTermReportLabel.CPC.index()).getNumericCellValue(),
+                row.getCell(SearchTermReportLabel.ROAS.index()).getNumericCellValue()
         );
     }
 }
