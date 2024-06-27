@@ -15,7 +15,7 @@ public record SearchTermReportRow(
         String customerSearchTerm,
         Integer impressions,
         Integer clicks,
-        Double clickThrough,
+        Double clickThroughRate,
         Double spend,
         Double sales,
         Integer orders,

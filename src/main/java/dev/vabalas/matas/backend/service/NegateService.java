@@ -10,6 +10,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -45,12 +46,11 @@ import static dev.vabalas.matas.model.SearchTermReportRow.State;
 @Service
 public class NegateService {
 
-    private static final String SPONSORED_PRODUCTS_CAMPAIGNS_SHEET_NAME = "Sponsored Products Campaigns";
     private static final String PROCESSED_ROWS_SHEET_NAME = "Processed rows";
     private static final String SEARCH_TERM_REPORT_SHEET_NAME = "SP Search Term Report";
     private static final int TOP_ROW_INDEX = 0;
 
-    public List<SearchTermReportRow> extractInterestingRows(InputStream inputStream) throws IOException {
+    public List<SearchTermReportRow> extractInterestingRows(InputStream inputStream, int minClicks) throws IOException {
         try (var workBook = new XSSFWorkbook(inputStream)) {
             var rowIterator = workBook.getSheet(SEARCH_TERM_REPORT_SHEET_NAME).rowIterator();
             var searchTermReportRows = new ArrayList<SearchTermReportRow>();
@@ -66,8 +66,34 @@ public class NegateService {
                             row.matchType() != MatchType.EXACT &&
                             !row.customerSearchTerm().startsWith("b0") &&
                             row.orders() == 0 &&
-                            row.clicks() >= 10)
+                            row.clicks() >= minClicks)
                     .toList();
+        }
+    }
+
+    public byte[] generateReport(Set<SearchTermReportRow> selectedItems) throws IOException {
+        try (var newWorkBook = new XSSFWorkbook();
+             var outputStream = new ByteArrayOutputStream()) {
+            newWorkBook.createSheet(PROCESSED_ROWS_SHEET_NAME);
+            var newWorkBookSheet = newWorkBook.getSheet(PROCESSED_ROWS_SHEET_NAME);
+            newWorkBookSheet.createRow(TOP_ROW_INDEX);
+            var processedRowsSheetLabelRow = newWorkBookSheet.getRow(TOP_ROW_INDEX);
+
+            var labelEnumValues = SponsoredProductsCampaignsLabel.values();
+            for (int index = 0; index < labelEnumValues.length; index++) {
+                processedRowsSheetLabelRow.createCell(index, CellType.STRING);
+                processedRowsSheetLabelRow.getCell(index).setCellValue(labelEnumValues[index].label());
+            }
+
+            selectedItems.stream()
+                    .map(it -> new SponsoredProductsCampaignsView(it.product(), "negative keyword", "create",
+                            String.valueOf(it.campaignId()), String.valueOf(it.adGroupId()), it.state().name().toLowerCase(),
+                            it.customerSearchTerm(), "negative exact"))
+                    .forEach(row -> addToSheet(row, newWorkBookSheet));
+
+            newWorkBook.write(outputStream);
+
+            return outputStream.toByteArray();
         }
     }
 
@@ -119,23 +145,5 @@ public class NegateService {
                 row.getCell(CPC.index()).getNumericCellValue(),
                 row.getCell(ROAS.index()).getNumericCellValue()
         );
-    }
-
-    public Object generateReport(Set<SponsoredProductsCampaignsView> selectedItems) throws IOException {
-        try (var newWorkBook = new XSSFWorkbook()) {
-            newWorkBook.createSheet(PROCESSED_ROWS_SHEET_NAME);
-            var newWorkBookSheet = newWorkBook.getSheet(PROCESSED_ROWS_SHEET_NAME);
-            newWorkBookSheet.createRow(TOP_ROW_INDEX);
-            var processedRowsSheetLabelRow = newWorkBookSheet.getRow(TOP_ROW_INDEX);
-
-            var labelEnumValues = SponsoredProductsCampaignsLabel.values();
-            for (int index = 0; index < labelEnumValues.length; index++) {
-                processedRowsSheetLabelRow.createCell(index, CellType.STRING);
-                processedRowsSheetLabelRow.getCell(index).setCellValue(labelEnumValues[index].label());
-            }
-
-            selectedItems.forEach(row -> addToSheet(row, newWorkBookSheet));
-            return null; // todo how to file "save as" in Vaadin?
-        }
     }
 }
