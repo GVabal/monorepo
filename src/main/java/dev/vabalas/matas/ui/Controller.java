@@ -15,8 +15,7 @@ public class Controller {
 
     @FXML
     void toggleRacoonImage(ActionEvent event) {
-        boolean imageVisible = racoonImage.isVisible();
-        showHideButton.setText(imageVisible ? "Show" : "Hide");
-        racoonImage.setVisible(!imageVisible);
+        showHideButton.setText(racoonImage.isVisible() ? "Show" : "Hide");
+        racoonImage.setVisible(!racoonImage.isVisible());
     }
 }
