@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.Scene?>
-<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.stage.Stage?>
 
@@ -10,7 +12,12 @@
         <Scene>
             <AnchorPane prefHeight="400.0" prefWidth="600.0">
             <children>
-               <Button layoutX="274.0" layoutY="187.0" mnemonicParsing="false" text="Button" />
+               <ImageView fx:id="racoonImage" fitHeight="249.0" fitWidth="332.0" layoutX="176.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                  <image>
+                     <Image url="@racoon.jpg" />
+                  </image>
+               </ImageView>
+               <ToggleButton fx:id="showHideButton" layoutX="275.0" layoutY="301.0" mnemonicParsing="false" onAction="#toggleRacoonImage" prefWidth="50.0" text="Show" />
             </children></AnchorPane>
         </Scene>
     </scene>
