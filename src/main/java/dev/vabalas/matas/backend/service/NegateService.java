@@ -13,8 +13,9 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -26,8 +27,9 @@ public class NegateService {
     private static final String SEARCH_TERM_REPORT_SHEET_NAME = "SP Search Term Report";
     private static final int TOP_ROW_INDEX = 0;
 
-    public List<SearchTermReportRow> extractInterestingRows(InputStream inputStream, int minClicks) {
-        try (var workBook = new XSSFWorkbook(inputStream)) {
+    public List<SearchTermReportRow> extractInterestingRows(File excelFile, int minClicks) {
+        try (var inputStream = new FileInputStream(excelFile);
+             var workBook = new XSSFWorkbook(inputStream)) {
             var rowIterator = workBook.getSheet(SEARCH_TERM_REPORT_SHEET_NAME).rowIterator();
             var searchTermReportRows = new ArrayList<SearchTermReportRow>();
 
