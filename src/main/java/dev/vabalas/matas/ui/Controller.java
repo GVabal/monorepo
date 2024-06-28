@@ -4,6 +4,7 @@ import dev.vabalas.matas.backend.service.NegateService;
 import dev.vabalas.matas.model.SearchTermReportRow;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
@@ -13,8 +14,10 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class Controller {
+public class Controller implements Initializable {
 
     private final NegateService negateService = new NegateService();
     private final FileChooser fileChooser = new FileChooser();
@@ -32,6 +35,11 @@ public class Controller {
     @FXML
     private TableView<SearchTermReportRow> processedRowsTable;
 
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        minClicksInput.setText("10");
+    }
+
     @FXML
     void selectFile(ActionEvent event) {
         selectedFile = fileChooser.showOpenDialog(new Stage());
@@ -39,6 +47,10 @@ public class Controller {
             fileSelectLabel.setText(selectedFile.getName());
             fileSelectButton.setDisable(true);
             minClicksInput.setDisable(false);
+            processButton.setDisable(false);
+        } else {
+            minClicksInput.setDisable(true);
+            processButton.setDisable(true);
         }
     }
 

@@ -14,8 +14,8 @@ public class App extends Application {
     }
 
     @Override
-    public void start(Stage doNotUse) throws IOException {
-        Stage primaryStage = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/matas.fxml")));
+    public void start(Stage primaryStage) throws IOException {
+        primaryStage = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/matas.fxml")));
         primaryStage.show();
     }
 }

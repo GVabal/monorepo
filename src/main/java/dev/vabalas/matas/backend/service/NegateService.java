@@ -5,13 +5,13 @@ import dev.vabalas.matas.model.SearchTermReportRow;
 import dev.vabalas.matas.model.SponsoredProductsCampaignsLabel;
 import dev.vabalas.matas.model.SponsoredProductsCampaignsRow;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class NegateService {
 
-    private static final Logger log = LoggerFactory.getLogger(NegateService.class);
+    private static final Logger log = LogManager.getLogger(NegateService.class);
     private static final String PROCESSED_ROWS_SHEET_NAME = "Processed rows";
     private static final String SEARCH_TERM_REPORT_SHEET_NAME = "SP Search Term Report";
     private static final int TOP_ROW_INDEX = 0;
