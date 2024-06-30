@@ -4,7 +4,6 @@ import dev.vabalas.matas.model.SearchTermReportLabel;
 import dev.vabalas.matas.model.SearchTermReportRow;
 import dev.vabalas.matas.model.SponsoredProductsCampaignsLabel;
 import dev.vabalas.matas.model.SponsoredProductsCampaignsRow;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -18,8 +17,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 public class NegateService {
 
@@ -53,7 +52,7 @@ public class NegateService {
         }
     }
 
-    public byte[] generateReport(Set<SearchTermReportRow> selectedItems) {
+    public byte[] generateReport(Collection<SearchTermReportRow> selectedItems) {
         try (var newWorkBook = new XSSFWorkbook();
              var outputStream = new ByteArrayOutputStream()) {
             newWorkBook.createSheet(PROCESSED_ROWS_SHEET_NAME);

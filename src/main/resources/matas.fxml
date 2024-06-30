@@ -3,8 +3,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
@@ -14,49 +13,23 @@
 <Stage title="OP Matas Build" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dev.vabalas.matas.ui.Controller">
     <scene>
         <Scene>
-            <AnchorPane prefHeight="600.0" prefWidth="1561.0">
+            <AnchorPane prefHeight="272.0" prefWidth="302.0">
             <children>
-               <Text layoutX="261.0" layoutY="42.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Negate Excel Processor">
+               <Text layoutX="14.0" layoutY="35.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Negate Excel Processor">
                   <font>
                      <Font name="Comic Sans MS" size="25.0" />
                   </font>
                </Text>
-               <Button fx:id="fileSelectButton" layoutX="69.0" layoutY="137.0" mnemonicParsing="false" onAction="#selectFile" text="Select file">
+               <Button fx:id="fileSelectButton" layoutX="115.0" layoutY="61.0" mnemonicParsing="false" onAction="#selectFile" text="Select file">
                   <font>
                      <Font name="Comic Sans MS" size="12.0" />
                   </font>
                </Button>
-               <Label fx:id="fileSelectLabel" layoutX="66.0" layoutY="98.0" text="No file selected" />
-               <Label layoutX="373.0" layoutY="115.0" text="Min clicks" />
-               <TextField fx:id="minClicksInput" disable="true" layoutX="375.0" layoutY="137.0" onKeyTyped="#validateMinClicksInput" prefHeight="25.0" prefWidth="48.0" />
-               <Button fx:id="processButton" disable="true" layoutX="638.0" layoutY="137.0" mnemonicParsing="false" onAction="#processFile" text="Process" />
-               <TableView fx:id="processedRowsTable" layoutX="14.0" layoutY="200.0" prefHeight="173.0" prefWidth="1537.0">
-                 <columns>
-                   <TableColumn editable="false" prefWidth="75.0" text="Product" />
-                   <TableColumn editable="false" prefWidth="75.0" text="Campaign ID" />
-                     <TableColumn editable="false" prefWidth="75.0" text="Ad group ID" />
-                     <TableColumn editable="false" prefWidth="75.0" text="Keyword ID" />
-                     <TableColumn editable="false" prefWidth="75.0" text="Product targeting ID" />
-                     <TableColumn editable="false" prefWidth="56.0" text="State" />
-                     <TableColumn editable="false" prefWidth="54.66668701171875" text="Campaign state" />
-                     <TableColumn editable="false" prefWidth="52.000030517578125" text="Bid" />
-                     <TableColumn editable="false" prefWidth="140.0" text="Keyword text" />
-                     <TableColumn editable="false" prefWidth="75.0" text="Match type" />
-                     <TableColumn editable="false" prefWidth="75.0" text="Product targeting expression" />
-                     <TableColumn editable="false" prefWidth="75.0" text="Customer search term" />
-                     <TableColumn editable="false" prefWidth="75.0" text="Impressions" />
-                     <TableColumn editable="false" prefWidth="41.33331298828125" text="Clicks" />
-                     <TableColumn editable="false" prefWidth="66.0" text="Click-through rate" />
-                     <TableColumn prefWidth="47.3333740234375" text="Spend" />
-                     <TableColumn editable="false" prefWidth="54.0" text="Sales" />
-                     <TableColumn editable="false" prefWidth="54.66650390625" text="Orders" />
-                     <TableColumn editable="false" prefWidth="55.3333740234375" text="Units" />
-                     <TableColumn editable="false" prefWidth="66.0" text="Conversion rate" />
-                     <TableColumn editable="false" prefWidth="54.666748046875" text="ACOS" />
-                     <TableColumn editable="false" prefWidth="57.9998779296875" text="CPC" />
-                     <TableColumn editable="false" prefWidth="54.66658528645826" text="ROAS" />
-                 </columns>
-               </TableView>
+               <Label fx:id="fileSelectLabel" layoutX="112.0" layoutY="87.0" text="No file selected" />
+               <Label layoutX="33.0" layoutY="161.0" text="Min clicks" />
+               <TextField fx:id="minClicksInput" disable="true" layoutX="35.0" layoutY="136.0" onKeyTyped="#validateMinClicksInput" prefHeight="25.0" prefWidth="48.0" />
+               <Button fx:id="processButton" disable="true" layoutX="125.0" layoutY="204.0" mnemonicParsing="false" onAction="#processFile" text="Process" />
+               <ProgressBar fx:id="progressIndicator" layoutX="125.0" layoutY="229.0" prefHeight="20.0" prefWidth="56.0" progress="0.0" />
             </children></AnchorPane>
         </Scene>
     </scene>
